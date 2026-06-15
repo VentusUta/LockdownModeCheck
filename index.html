@@ -5,6 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lockdown Mode Check</title>
+    <style>
+        * {
+            text-autospace: normal;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: serif;
+        }
+    </style>
 </head>
 
 <body>
@@ -12,6 +21,16 @@
     <noscript>
         <p style="color: maroon;">JavaScript is disabled. Can't run check.</p>
     </noscript>
+    <hr>
+    <p>
+        Copyright &copy; 2026 Ventus Uta. Licensed under <a
+            href="https://raw.githubusercontent.com/VentusUta/LockdownModeCheck/refs/heads/main/COPYING">ISC
+            License</a>.
+    </p>
+    <p>
+        Source code: <a
+            href="https://github.com/VentusUta/LockdownModeCheck">https://github.com/VentusUta/LockdownModeCheck</a>
+    </p>
     <script>
         function applePlatformCheck() {
             if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
@@ -86,12 +105,13 @@
             if (await lockdownModeCheck()) {
                 checkResult = `
 <h1>Lockdown Mode Check</h1>
+<hr>
 <p>
     Your device is under ‘Lockdown Mode’.
 </p>
 <p>
     <ul>
-        <li>Apple platform test: ${platformResultPassOrFail}</li>
+        <li>Apple device test: ${platformResultPassOrFail}</li>
         <li>Disabled features test: ${featuresResultPassOrFail}</li>
         <ul>
             <li>FileReader API: ${fileReaderResultPassOrFail}</li>
@@ -104,16 +124,54 @@
         </ul>
     </ul>
 </p>
+<hr>
+<p>
+    Copyright &copy; 2026 Ventus Uta. Licensed under <a href="https://raw.githubusercontent.com/VentusUta/LockdownModeCheck/refs/heads/main/COPYING">ISC License</a>.
+</p>
+<p>
+    Source code: <a href="https://github.com/VentusUta/LockdownModeCheck">https://github.com/VentusUta/LockdownModeCheck</a>
+</p>
 `;
+            } else if (!applePlatformCheck()) {
+                checkResult = `
+<h1>Lockdown Mode Check</h1>
+<hr>
+<p>
+    Your device isn’t Apple device, but you can still check some security-related features status below.
+</p>
+<p>
+    <ul>
+        <li>Apple device test: ${platformResultPassOrFail}</li>
+        <li>Disabled features test: ${featuresResultPassOrFail}</li>
+        <ul>
+            <li>FileReader API: ${fileReaderResultPassOrFail}</li>
+            <li>WASM: ${WASMResultPassOrFail}</li>
+            <li>MathML: ${MathMLResultPassOrFail}</li>
+            <li>WebGPU: ${WebGPUResultPassOrFail}</li>
+            <li>WebGL: ${WebGLResultPassOrFail}</li>
+            <li>WebRTC: ${WebRTCResultPassOrFail}</li>
+            <li>IndexedDB: ${indexedDBResultPassOrFail}</li>
+        </ul>
+    </ul>
+</p>
+<hr>
+<p>
+    Copyright &copy; 2026 Ventus Uta. Licensed under <a href="https://raw.githubusercontent.com/VentusUta/LockdownModeCheck/refs/heads/main/COPYING">ISC License</a>.
+</p>
+<p>
+    Source code: <a href="https://github.com/VentusUta/LockdownModeCheck">https://github.com/VentusUta/LockdownModeCheck</a>
+</p>
+`
             } else {
                 checkResult = `
 <h1>Lockdown Mode Check</h1>
+<hr>
 <p>
     Your device isn’t under ‘Lockdown Mode’.
 </p>
 <p>
     <ul>
-        <li>Apple platform test: ${platformResultPassOrFail}</li>
+        <li>Apple device test: ${platformResultPassOrFail}</li>
         <li>Disabled features test: ${featuresResultPassOrFail}</li>
         <ul>
             <li>FileReader API: ${fileReaderResultPassOrFail}</li>
@@ -125,6 +183,13 @@
             <li>IndexedDB: ${indexedDBResultPassOrFail}</li>
         </ul>
     </ul>
+</p>
+<hr>
+<p>
+    Copyright &copy; 2026 Ventus Uta. Licensed under <a href="https://raw.githubusercontent.com/VentusUta/LockdownModeCheck/refs/heads/main/COPYING">ISC License</a>.
+</p>
+<p>
+    Source code: <a href="https://github.com/VentusUta/LockdownModeCheck">https://github.com/VentusUta/LockdownModeCheck</a>
 </p>
 `;
             }
