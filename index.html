@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <title>Lockdown Mode Check</title>
+</head>
+
+<body>
+    <h1>Lockdown Mode Check</h1>
+    <noscript>
+        <p style="color: brown;">JavaScript is disabled. Can't run check.</p>
+    </noscript>
+    <script>
+        function basicApplePlatformCheck() {
+            if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
+                (navigator.platform === "MacIntel" && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
+                (navigator.platform === "MacIntel" && /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints === 0 && navigator.vendor === "Apple Computer, Inc.")) {
+                console.log("%c[Lockdown Mode Check]%c Basic Apple platform check %cPASS%c. Device may running iOS/iPadOS/macOS, or spoofed.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
+                return true;
+            } else {
+                console.log("%c[Lockdown Mode Check]%c Basic Apple platform check %cFAIL%c. Device may not running Apple OSes.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
+                return false;
+            }
+        }
+
+        async function realSafariCheck() {
+            return new Promise((ok) => {
+                const safariCSSHackElement = document.createElement("_");
+                safariCSSHackElement.className = "safari-sniff";
+                safariCSSHackElement.style.color = "black";
+                document.documentElement.appendChild(safariCSSHackElement);
+                const style = document.createElement("style");
+                style.textContent = `
+                _:not(a,b), .safari-sniff {
+                    color: cyan !important;
+                }
+                _:default:not(:root:root), .safari-sniff {
+                    color: teal !important;
+                }
+                `
+                document.head.appendChild(style);
+                setTimeout(() => {
+                    const color = window.getComputedStyle(safariCSSHackElement).color;
+                    safariCSSHackElement.remove();
+                    style.remove();
+                    ok(color === 'rgb(0, 128, 128)' || color === 'rgb(0, 255, 255)');
+                }, 100);
+            });
+        }
+
+        async function strongApplePlatformCheck() {
+            if (typeof window.safari === "undefined" ||
+                !(await realSafariCheck())) {
+                console.log("%c[Lockdown Mode Check]%c Real Safari check %cFAIL%c. Seems this browser not Safari.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
+                return false;
+            } else {
+                console.log("%c[Lockdown Mode Check]%c Real Safari check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
+                return true;
+            }
+        }
+
+        const missingFileReader = typeof FileReader === "undefined";
+        const missingWASM = typeof WebAssembly === "undefined";
+        const missingMathML = typeof MathMLElement === "undefined";
+        const missingWebGPU = typeof navigator.gpu === "undefined";
+        const missingWebGL = !document.createElement('canvas').getContext('webgl');
+        const missingWebRTC = typeof RTCPeerConnection === "undefined";
+
+        function basicDisabledFeaturesCheck() {
+            if (missingFileReader && missingWASM && missingMathML && missingWebGPU && missingWebGL && missingWebRTC) {
+                console.log("%c[Lockdown Mode Check]%c Basic disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
+                return true;
+            } else {
+                console.log("%c[Lockdown Mode Check]%c Basic disabled features check %cFAIL%c. Device may not under Lockdown Mode.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
+                return false;
+            }
+        }
+
+        async function indexedDBCheck() {
+            return new Promise((ok) => {
+                if (!window.indexedDB) {
+                    return ok(true);
+                }
+                const testIndexedDB = window.indexedDB.open("LockdownModeCheck", 1);
+                const timeout = setTimeout(() => ok(true), 3000);
+                testIndexedDB.onerror = () => {
+                    clearTimeout(timeout);
+                    ok(true);
+                };
+                testIndexedDB.onsuccess = () => {
+                    clearTimeout(timeout);
+                    testIndexedDB.result.close();
+                    window.indexedDB.deleteDatabase("LockdownModeCheck");
+                    ok(false);
+                };
+            });
+        }
+
+        async function webFontCheck() {
+            return new Promise((ok) => {
+                if (typeof FontFace === "undefined") {
+                    return ok(true);
+                }
+                const font = new FontFace("test-font", "url(./fonts/test.ttf)");
+                font.load().then(() => ok(false)).catch(() => ok(true));
+                setTimeout(() => ok(true), 3000);
+            });
+        }
+
+        async function strongDisabledFeaturesCheck() {
+            if ((await indexedDBCheck()) && (await webFontCheck())) {
+                console.log("%c[Lockdown Mode Check]%c Strong disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
+                return true;
+            } else {
+                console.log("%c[Lockdown Mode Check]%c Strong disabled features check %cFAIL%c. Device may not under Lockdown Mode.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
+                return false;
+            }
+        }
+
+        let isLockdownMode = false
+
+        async function lockdownModeCheck() {
+            if (basicApplePlatformCheck() && (await strongApplePlatformCheck()) && basicDisabledFeaturesCheck() && (await strongDisabledFeaturesCheck())) {
+                isLockdownMode = true;
+                return true;
+            }
+            return false;
+        }
+
+        const checkResult = document.createElement("p");
+        if (isLockdownMode) {
+            checkResult.textContent = "Your device is under 'Lockdown Mode'.";
+        } else {
+            checkResult.textContent = "Your device isn't under 'Lockdown Mode'.";
+        }
+        document.body.appendChild(checkResult);
+    </script>
+</body>
+
+</html>
