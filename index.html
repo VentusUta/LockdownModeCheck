@@ -79,10 +79,11 @@
             }
         }
 
+        const platformResultPassOrFail = platformResult ? testPass : testFail;
+        const featuresResultPassOrFail = featuresResult ? testPass : testFail;
+
         let checkResult = " ";
         (async () => {
-            const platformResultPassOrFail = platformResult ? testPass : testFail;
-            const featuresResultPassOrFail = featuresResult ? testPass : testFail;
             const fileReaderResultPassOrFail = missingFileReader ? featureDisabled : featureEnabled;
             const WASMResultPassOrFail = missingWASM ? featureDisabled : featureEnabled;
             const MathMLResultPassOrFail = missingMathML ? featureDisabled : featureEnabled;
