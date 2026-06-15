@@ -7,11 +7,13 @@
     <title>Lockdown Mode Check</title>
     <style>
         * {
-            text-autospace: normal;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            font-family: serif;
+        }
+
+        body {
+            font-family: Charter, serif;
         }
     </style>
 </head>
@@ -112,6 +114,12 @@
 <p>
     <ul>
         <li>Apple device test: ${platformResultPassOrFail}</li>
+        <ul>
+            <li><code>navigator.platform</code>: ${navigator.platform}</li>
+            <li><code>navigator.maxTouchPoints</code>: ${navigator.maxTouchPoints}</li>
+            <li><code>navigator.vendor</code>: ${navigator.vendor}</li>
+            <li>User-Agent: ${navigator.userAgent}</li>
+        </ul>
         <li>Disabled features test: ${featuresResultPassOrFail}</li>
         <ul>
             <li>FileReader API: ${fileReaderResultPassOrFail}</li>
@@ -142,6 +150,12 @@
 <p>
     <ul>
         <li>Apple device test: ${platformResultPassOrFail}</li>
+        <ul>
+            <li><code>navigator.platform</code>: ${navigator.platform}</li>
+            <li><code>navigator.maxTouchPoints</code>: ${navigator.maxTouchPoints}</li>
+            <li><code>navigator.vendor</code>: ${navigator.vendor}</li>
+            <li>User-Agent: ${navigator.userAgent}</li>
+        </ul>
         <li>Disabled features test: ${featuresResultPassOrFail}</li>
         <ul>
             <li>FileReader API: ${fileReaderResultPassOrFail}</li>
@@ -172,6 +186,12 @@
 <p>
     <ul>
         <li>Apple device test: ${platformResultPassOrFail}</li>
+        <ul>
+            <li><code>navigator.platform</code>: ${navigator.platform}</li>
+            <li><code>navigator.maxTouchPoints</code>: ${navigator.maxTouchPoints}</li>
+            <li><code>navigator.vendor</code>: ${navigator.vendor}</li>
+            <li>User-Agent: ${navigator.userAgent}</li>
+        </ul>
         <li>Disabled features test: ${featuresResultPassOrFail}</li>
         <ul>
             <li>FileReader API: ${fileReaderResultPassOrFail}</li>
