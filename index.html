@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -8,7 +8,7 @@
 
 <body>
     <script>
-        function basicApplePlatformCheck() {
+        function applePlatformCheck() {
             if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints === 0 && navigator.vendor === "Apple Computer, Inc.")) {
@@ -17,42 +17,6 @@
             } else {
                 console.log("%c[Lockdown Mode Check]%c Basic Apple platform check %cFAIL%c. Device may not running Apple OSes.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
                 return false;
-            }
-        }
-
-        async function realSafariCheck() {
-            return new Promise((ok) => {
-                const safariCSSHackElement = document.createElement("_");
-                safariCSSHackElement.className = "safari-sniff";
-                safariCSSHackElement.style.color = "black";
-                document.documentElement.appendChild(safariCSSHackElement);
-                const style = document.createElement("style");
-                style.textContent = `
-                _:not(a,b), .safari-sniff {
-                    color: cyan !important;
-                }
-                _:default:not(:root:root), .safari-sniff {
-                    color: teal !important;
-                }
-                `
-                document.head.appendChild(style);
-                setTimeout(() => {
-                    const color = window.getComputedStyle(safariCSSHackElement).color;
-                    safariCSSHackElement.remove();
-                    style.remove();
-                    ok(color === 'rgb(0, 128, 128)' || color === 'rgb(0, 255, 255)');
-                }, 100);
-            });
-        }
-
-        async function strongApplePlatformCheck() {
-            if (typeof window.safari === "undefined" ||
-                !(await realSafariCheck())) {
-                console.log("%c[Lockdown Mode Check]%c Real Safari check %cFAIL%c. Seems this browser not Safari.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
-                return false;
-            } else {
-                console.log("%c[Lockdown Mode Check]%c Real Safari check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
-                return true;
             }
         }
 
@@ -93,19 +57,8 @@
             });
         }
 
-        async function webFontCheck() {
-            return new Promise((ok) => {
-                if (typeof FontFace === "undefined") {
-                    return ok(true);
-                }
-                const font = new FontFace("test-font", "url(./fonts/test.ttf)");
-                font.load().then(() => ok(false)).catch(() => ok(true));
-                setTimeout(() => ok(true), 3000);
-            });
-        }
-
         async function strongDisabledFeaturesCheck() {
-            if ((await indexedDBCheck()) && (await webFontCheck())) {
+            if (await indexedDBCheck()) {
                 console.log("%c[Lockdown Mode Check]%c Strong disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
                 return true;
             } else {
@@ -116,16 +69,14 @@
 
         let isLockdownMode = false;
         let basicCheck1 = false;
-        let strongCheck1 = false;
         let basicCheck2 = false;
         let strongCheck2 = false;
 
         async function lockdownModeCheck() {
-            basicCheck1 = basicApplePlatformCheck();
-            strongCheck1 = await strongApplePlatformCheck();
+            basicCheck1 = applePlatformCheck();
             basicCheck2 = basicDisabledFeaturesCheck();
             strongCheck2 = await strongDisabledFeaturesCheck();
-            if (basicCheck1 && strongCheck1 && basicCheck2 && strongCheck2) {
+            if (basicCheck1 && basicCheck2 && strongCheck2) {
                 return true;
             } else {
                 return false;
@@ -144,10 +95,9 @@
     Your device is under 'Lockdown Mode'.
 </p>
 <pre>
-    basicApplePlatformCheck: ${basicCheck1}
-    strongApplePlatformCheck: ${strongCheck1}
+    applePlatformCheck: ${basicCheck1}
     basicDisabledFeaturesCheck: ${basicCheck2}
-    strongDisabledFeaturesCheck ${strongCheck2}
+    strongDisabledFeaturesCheck: ${strongCheck2}
 </pre>
 `;
             } else {
@@ -160,10 +110,9 @@
     Your device isn't under 'Lockdown Mode'.
 </p>
 <pre>
-basicApplePlatformCheck: ${basicCheck1}
-strongApplePlatformCheck: ${strongCheck1}
+applePlatformCheck: ${basicCheck1}
 basicDisabledFeaturesCheck: ${basicCheck2}
-strongDisabledFeaturesCheck ${strongCheck2}
+strongDisabledFeaturesCheck: ${strongCheck2}
 </pre>`;
             }
             document.body.innerHTML = checkResult;
