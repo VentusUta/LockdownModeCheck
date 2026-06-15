@@ -17,10 +17,8 @@
             if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints === 0 && navigator.vendor === "Apple Computer, Inc.")) {
-                console.log("%c[Lockdown Mode Check]%c Apple platform check %cPASS%c. Device may running iOS/iPadOS/macOS, or spoofed.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
                 return true;
             } else {
-                console.log("%c[Lockdown Mode Check]%c Apple platform check %cFAIL%c. Device may not running Apple OSes.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
                 return false;
             }
         }
@@ -54,36 +52,30 @@
 
         async function disabledFeaturesCheck() {
             if (missingFileReader && missingWASM && missingMathML && missingWebGPU && missingWebGL && missingWebRTC && (await indexedDBCheck())) {
-                console.log("%c[Lockdown Mode Check]%c Disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
                 return true;
             } else {
-                console.log("%c[Lockdown Mode Check]%c Disabled features check %cFAIL%c. Device may not under Lockdown Mode.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
                 return false;
             }
         }
 
-        let platformResult = false;
-        let featuresResult = false;
         const testPass = `<span style="font-weight: bold; color: green;">PASS</span>`
         const testFail = `<span style="font-weight: bold; color: maroon;">FAIL</span>`
         const featureDisabled = `<span style="font-weight: bold; color: green;">DISABLED</span>`
         const featureEnabled = `<span style="font-weight: bold; color: maroon;">ENABLED</span>`
 
         async function lockdownModeCheck() {
-            platformResult = applePlatformCheck();
-            featuresResult = disabledFeaturesCheck();
-            if (platformResult && featuresResult) {
+            if (applePlatformCheck() && (await disabledFeaturesCheck())) {
                 return true;
             } else {
                 return false;
             }
         }
 
-        const platformResultPassOrFail = platformResult ? testPass : testFail;
-        const featuresResultPassOrFail = featuresResult ? testPass : testFail;
 
         let checkResult = " ";
         (async () => {
+            const platformResultPassOrFail = applePlatformCheck() ? testPass : testFail;
+            const featuresResultPassOrFail = (await disabledFeaturesCheck()) ? testPass : testFail;
             const fileReaderResultPassOrFail = missingFileReader ? featureDisabled : featureEnabled;
             const WASMResultPassOrFail = missingWASM ? featureDisabled : featureEnabled;
             const MathMLResultPassOrFail = missingMathML ? featureDisabled : featureEnabled;
