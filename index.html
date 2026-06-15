@@ -7,10 +7,6 @@
 </head>
 
 <body>
-    <h1>Lockdown Mode Check</h1>
-    <noscript>
-        <p style="color: brown;">JavaScript is disabled. Can't run check.</p>
-    </noscript>
     <script>
         function basicApplePlatformCheck() {
             if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
@@ -118,23 +114,60 @@
             }
         }
 
-        let isLockdownMode = false
+        let isLockdownMode = false;
+        let basicCheck1 = false;
+        let strongCheck1 = false;
+        let basicCheck2 = false;
+        let strongCheck2 = false;
 
         async function lockdownModeCheck() {
-            if (basicApplePlatformCheck() && (await strongApplePlatformCheck()) && basicDisabledFeaturesCheck() && (await strongDisabledFeaturesCheck())) {
-                isLockdownMode = true;
+            basicCheck1 = basicApplePlatformCheck();
+            strongCheck1 = await strongApplePlatformCheck();
+            basicCheck2 = basicDisabledFeaturesCheck();
+            strongCheck2 = await strongDisabledFeaturesCheck();
+            if (basicCheck1 && strongCheck1 && basicCheck2 && strongCheck2) {
                 return true;
+            } else {
+                return false;
             }
-            return false;
         }
 
-        const checkResult = document.createElement("p");
-        if (isLockdownMode) {
-            checkResult.textContent = "Your device is under 'Lockdown Mode'.";
-        } else {
-            checkResult.textContent = "Your device isn't under 'Lockdown Mode'.";
-        }
-        document.body.appendChild(checkResult);
+        let checkResult = " ";
+        (async () => {
+            if (await lockdownModeCheck()) {
+                checkResult = `
+<h1>Lockdown Mode Check</h1>
+<noscript>
+    <p style="color: brown;">JavaScript is disabled. Can't run check.</p>
+</noscript>
+<p>
+    Your device is under 'Lockdown Mode'.
+</p>
+<pre>
+    basicApplePlatformCheck: ${basicCheck1}
+    strongApplePlatformCheck: ${strongCheck1}
+    basicDisabledFeaturesCheck: ${basicCheck2}
+    strongDisabledFeaturesCheck ${strongCheck2}
+</pre>
+`;
+            } else {
+                checkResult = `
+<h1>Lockdown Mode Check</h1>
+<noscript>
+    <p style="color: brown;">JavaScript is disabled. Can't run check.</p>
+</noscript>
+<p>
+    Your device isn't under 'Lockdown Mode'.
+</p>
+<pre>
+basicApplePlatformCheck: ${basicCheck1}
+strongApplePlatformCheck: ${strongCheck1}
+basicDisabledFeaturesCheck: ${basicCheck2}
+strongDisabledFeaturesCheck ${strongCheck2}
+</pre>`;
+            }
+            document.body.innerHTML = checkResult;
+        })();
     </script>
 </body>
 
