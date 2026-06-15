@@ -13,8 +13,6 @@
         <p style="color: maroon;">JavaScript is disabled. Can't run check.</p>
     </noscript>
     <script>
-        "use strict";
-
         function applePlatformCheck() {
             if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
@@ -54,7 +52,7 @@
             });
         }
 
-        async function DisabledFeaturesCheck() {
+        async function disabledFeaturesCheck() {
             if (missingFileReader && missingWASM && missingMathML && missingWebGPU && missingWebGL && missingWebRTC && (await indexedDBCheck())) {
                 console.log("%c[Lockdown Mode Check]%c Disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
                 return true;
@@ -73,7 +71,7 @@
 
         async function lockdownModeCheck() {
             platformResult = applePlatformCheck();
-            featuresResult = DisabledFeaturesCheck();
+            featuresResult = disabledFeaturesCheck();
             if (platformResult && featuresResult) {
                 return true;
             } else {
