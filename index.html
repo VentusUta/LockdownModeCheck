@@ -3,19 +3,26 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lockdown Mode Check</title>
 </head>
 
 <body>
+    <h1>Lockdown Mode Check</h1>
+    <noscript>
+        <p style="color: maroon;">JavaScript is disabled. Can't run check.</p>
+    </noscript>
     <script>
+        "use strict";
+
         function applePlatformCheck() {
             if ((navigator.platform === "iPhone" && /iPhone|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && navigator.maxTouchPoints >= 5 && navigator.vendor === "Apple Computer, Inc.") ||
                 (navigator.platform === "MacIntel" && /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints === 0 && navigator.vendor === "Apple Computer, Inc.")) {
-                console.log("%c[Lockdown Mode Check]%c Basic Apple platform check %cPASS%c. Device may running iOS/iPadOS/macOS, or spoofed.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
+                console.log("%c[Lockdown Mode Check]%c Apple platform check %cPASS%c. Device may running iOS/iPadOS/macOS, or spoofed.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
                 return true;
             } else {
-                console.log("%c[Lockdown Mode Check]%c Basic Apple platform check %cFAIL%c. Device may not running Apple OSes.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
+                console.log("%c[Lockdown Mode Check]%c Apple platform check %cFAIL%c. Device may not running Apple OSes.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
                 return false;
             }
         }
@@ -26,16 +33,6 @@
         const missingWebGPU = typeof navigator.gpu === "undefined";
         const missingWebGL = !document.createElement('canvas').getContext('webgl');
         const missingWebRTC = typeof RTCPeerConnection === "undefined";
-
-        function basicDisabledFeaturesCheck() {
-            if (missingFileReader && missingWASM && missingMathML && missingWebGPU && missingWebGL && missingWebRTC) {
-                console.log("%c[Lockdown Mode Check]%c Basic disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
-                return true;
-            } else {
-                console.log("%c[Lockdown Mode Check]%c Basic disabled features check %cFAIL%c. Device may not under Lockdown Mode.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
-                return false;
-            }
-        }
 
         async function indexedDBCheck() {
             return new Promise((ok) => {
@@ -57,26 +54,27 @@
             });
         }
 
-        async function strongDisabledFeaturesCheck() {
-            if (await indexedDBCheck()) {
-                console.log("%c[Lockdown Mode Check]%c Strong disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
+        async function DisabledFeaturesCheck() {
+            if (missingFileReader && missingWASM && missingMathML && missingWebGPU && missingWebGL && missingWebRTC && (await indexedDBCheck())) {
+                console.log("%c[Lockdown Mode Check]%c Disabled features check %cPASS%c.", "font-weight: bold;", "", "font-weight: bold; color: green;", "");
                 return true;
             } else {
-                console.log("%c[Lockdown Mode Check]%c Strong disabled features check %cFAIL%c. Device may not under Lockdown Mode.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
+                console.log("%c[Lockdown Mode Check]%c Disabled features check %cFAIL%c. Device may not under Lockdown Mode.", "font-weight: bold;", "", "font-weight: bold; color: red;", "");
                 return false;
             }
         }
 
-        let isLockdownMode = false;
-        let basicCheck1 = false;
-        let basicCheck2 = false;
-        let strongCheck2 = false;
+        let platformResult = false;
+        let featuresResult = false;
+        const testPass = `<span style="font-weight: bold; color: green;">PASS</span>`
+        const testFail = `<span style="font-weight: bold; color: maroon;">FAIL</span>`
+        const featureDisabled = `<span style="font-weight: bold; color: green;">DISABLED</span>`
+        const featureEnabled = `<span style="font-weight: bold; color: maroon;">ENABLED</span>`
 
         async function lockdownModeCheck() {
-            basicCheck1 = applePlatformCheck();
-            basicCheck2 = basicDisabledFeaturesCheck();
-            strongCheck2 = await strongDisabledFeaturesCheck();
-            if (basicCheck1 && basicCheck2 && strongCheck2) {
+            platformResult = applePlatformCheck();
+            featuresResult = DisabledFeaturesCheck();
+            if (platformResult && featuresResult) {
                 return true;
             } else {
                 return false;
@@ -85,35 +83,59 @@
 
         let checkResult = " ";
         (async () => {
+            const platformResultPassOrFail = platformResult ? testPass : testFail;
+            const featuresResultPassOrFail = featuresResult ? testPass : testFail;
+            const fileReaderResultPassOrFail = missingFileReader ? featureDisabled : featureEnabled;
+            const WASMResultPassOrFail = missingWASM ? featureDisabled : featureEnabled;
+            const MathMLResultPassOrFail = missingMathML ? featureDisabled : featureEnabled;
+            const WebGPUResultPassOrFail = missingWebGPU ? featureDisabled : featureEnabled;
+            const WebGLResultPassOrFail = missingWebGL ? featureDisabled : featureEnabled;
+            const WebRTCResultPassOrFail = missingWebRTC ? featureDisabled : featureEnabled;
+            const indexedDBResultPassOrFail = (await indexedDBCheck()) ? featureDisabled : featureEnabled;
             if (await lockdownModeCheck()) {
                 checkResult = `
 <h1>Lockdown Mode Check</h1>
-<noscript>
-    <p style="color: brown;">JavaScript is disabled. Can't run check.</p>
-</noscript>
 <p>
-    Your device is under 'Lockdown Mode'.
+    Your device is under ‘Lockdown Mode’.
 </p>
-<pre>
-    applePlatformCheck: ${basicCheck1}
-    basicDisabledFeaturesCheck: ${basicCheck2}
-    strongDisabledFeaturesCheck: ${strongCheck2}
-</pre>
+<p>
+    <ul>
+        <li>Apple platform test: ${platformResultPassOrFail}</li>
+        <li>Disabled features test: ${featuresResultPassOrFail}</li>
+        <ul>
+            <li>FileReader API: ${fileReaderResultPassOrFail}</li>
+            <li>WASM: ${WASMResultPassOrFail}</li>
+            <li>MathML: ${MathMLResultPassOrFail}</li>
+            <li>WebGPU: ${WebGPUResultPassOrFail}</li>
+            <li>WebGL: ${WebGLResultPassOrFail}</li>
+            <li>WebRTC: ${WebRTCResultPassOrFail}</li>
+            <li>IndexedDB: ${indexedDBResultPassOrFail}</li>
+        </ul>
+    </ul>
+</p>
 `;
             } else {
                 checkResult = `
 <h1>Lockdown Mode Check</h1>
-<noscript>
-    <p style="color: brown;">JavaScript is disabled. Can't run check.</p>
-</noscript>
 <p>
-    Your device isn't under 'Lockdown Mode'.
+    Your device isn’t under ‘Lockdown Mode’.
 </p>
-<pre>
-applePlatformCheck: ${basicCheck1}
-basicDisabledFeaturesCheck: ${basicCheck2}
-strongDisabledFeaturesCheck: ${strongCheck2}
-</pre>`;
+<p>
+    <ul>
+        <li>Apple platform test: ${platformResultPassOrFail}</li>
+        <li>Disabled features test: ${featuresResultPassOrFail}</li>
+        <ul>
+            <li>FileReader API: ${fileReaderResultPassOrFail}</li>
+            <li>WASM: ${WASMResultPassOrFail}</li>
+            <li>MathML: ${MathMLResultPassOrFail}</li>
+            <li>WebGPU: ${WebGPUResultPassOrFail}</li>
+            <li>WebGL: ${WebGLResultPassOrFail}</li>
+            <li>WebRTC: ${WebRTCResultPassOrFail}</li>
+            <li>IndexedDB: ${indexedDBResultPassOrFail}</li>
+        </ul>
+    </ul>
+</p>
+`;
             }
             document.body.innerHTML = checkResult;
         })();
